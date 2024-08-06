@@ -7,7 +7,9 @@ It should have a CRC32 value of: CBC68CD8
 
 2. Use the program wxPirs to extract the files from the SotN XBLA package file to a folder.
 
-3. Use the program XexTool to decrypt the default.xex file. 
+3. Use the program XexTool to decrypt the default.xex file. Commands are:
+xextool -c u default.xex
+xextool -e u default.xex
 
 Once you have your folder with the extracted files and decrypted the default.xex file you do not need to do steps 1 through 3 again.
 
