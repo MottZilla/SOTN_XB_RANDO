@@ -5,7 +5,7 @@ Getting Started:
 1. Obtain SotN Usa XBLA package file. Should be named: 9F2DAA064D494AA82B43B65362C59E9B89A88F8F58
 It should have a CRC32 value of: CBC68CD8
 
-2. Use the program wxPirs to extract the files from the SotN XBLA package file to a folder.
+2. Use the program wxPirs or Velocity ( https://github.com/Gualdimar/Velocity/ ) to extract the files from the SotN XBLA package file to a folder.
 
 3. Use the program XexTool to decrypt the default.xex file. Commands are:
 * 3a. xextool -c u default.xex
