@@ -26,6 +26,10 @@ FILE *fLIVE;
 LIVE_File FileTree[LIVE_FILEMAX];
 char InputPath[2048];
 
+// For Castlevania SotN XEX Decryption
+unsigned char SOTN_XEX[0xE84000];
+unsigned char SOTN_XOR[0xE84000];
+
 // Function Prototypes
 void LIVE_InitializeFileTree();
 void LIVE_ReadFileList();
@@ -37,6 +41,135 @@ unsigned int LIVE_Read_u16_be();
 unsigned int LIVE_Read_u32_be();
 unsigned int LIVE_Read_u32_le();
 int LIVE_GetBlockOffset(int BlockNumber,int ID);
+
+// This function detects the SotN XEX File and will decrypt it using XOR Table.
+void SOTN_Decrypt()
+{
+	char FullPath[4096];
+	char OpenPath[4096];
+	FILE *fSOTN_XEX;
+	FILE *fSOTN_XOR;
+	int FileSize;
+	int Temp;
+	unsigned int Checksum = 0;
+	unsigned int *CSData = (unsigned int *)&SOTN_XEX[0];
+	
+	const unsigned int CS_SOTN_FULL = 0xAEC1F617;		// 32-bit Add Checksums
+	const unsigned int CS_SOTN_HALFA = 0x08E03DB7;
+	const unsigned int CS_SOTN_HALFB = 0xA5E1B860;
+	
+	//printf("SotN Decrypt Start..\n");	// DEBUG
+
+	// Path Building
+	strcpy(FullPath,InputPath);
+	Temp = strlen(FullPath) - 1;
+	
+	while(Temp>0)
+	{
+		if(FullPath[Temp] == 0x5C)
+		{
+			FullPath[Temp+1] = 0;
+			break;
+		}
+		Temp--;
+	}
+	
+	// Open the default.xex we have extracted.
+	strcpy(OpenPath,FullPath);
+	strcat(OpenPath,"default.xex");
+	
+	fSOTN_XEX = fopen(OpenPath,"rb");
+	if(fSOTN_XEX == NULL)
+	{
+		//printf("Couldn't open %s\n",OpenPath);
+		return;
+	}
+	
+	//printf("Opened %s\n",OpenPath);	// DEBUG
+	
+	// File Size Check
+	fseek(fSOTN_XEX,0,SEEK_END);	FileSize = ftell(fSOTN_XEX);	fseek(fSOTN_XEX,0,SEEK_SET);
+	if(FileSize != 0xE84000)
+	{
+		//printf("File Size wrong!\n");
+		fclose(fSOTN_XEX);
+		return;
+	}
+	
+	fread(&SOTN_XEX[0],0xE84000,1,fSOTN_XEX);		// Read File into Memory
+	fclose(fSOTN_XEX);
+	
+	//printf("XEX is loaded into Memory.\n",OpenPath);	// DEBUG
+	
+	for(int i=0;i<0x3A1000;i++)		// Calculate FULL Checksum
+	{
+		Checksum = Checksum + CSData[i];
+	}
+	
+	Checksum &= 0xFFFFFFFF;	// Mask for 32-bit Size.
+	if(Checksum != CS_SOTN_FULL) return;	// If Checksum doesn't match we're done.
+	
+	Checksum = 0;
+	for(int i=0;i<0x1D0800;i++)
+	{
+		Checksum = Checksum + CSData[i];
+	}
+	
+	Checksum &= 0xFFFFFFFF;	// Mask for 32-bit Size.
+	if(Checksum != CS_SOTN_HALFA) return;	// If Checksum doesn't match we're done.
+	
+	Checksum = 0;
+	for(int i=0;i<0x1D0800;i++)
+	{
+		Checksum = Checksum + CSData[0x1D0800+i];
+	}
+	
+	Checksum &= 0xFFFFFFFF;	// Mask for 32-bit Size.
+	if(Checksum != CS_SOTN_HALFB) return;	// If Checksum doesn't match we're done.
+	
+	//printf("All Checksums OK!\n");	// DEBUG
+	printf("\nSotN XEX Detected..\n");	// DEBUG
+	
+	// If all 3 Checksums matched..
+	strcpy(OpenPath,FullPath);
+	strcat(OpenPath,"decrypt.xor");
+	
+	fSOTN_XOR = fopen(OpenPath,"rb");
+	if(fSOTN_XOR == NULL)
+	{
+		printf("Decryption Table [decrypt.xor] couldn't be opened.\nCan't decrypt XEX. Place decrypt.xor in same folder as this program.\n");
+		return;	// If Decryption Table not available we're done.
+	}
+	fread(&SOTN_XOR[0],0xE84000,1,fSOTN_XOR);	// Load Table
+	fclose(fSOTN_XOR);
+	
+	//printf("Opened %s\n",OpenPath);	// DEBUG
+	
+	// Save Encrypted Default.xex to file.
+	strcpy(OpenPath,FullPath);
+	strcat(OpenPath,"encrypted_default.xex");
+	
+	fSOTN_XEX = fopen(OpenPath,"wb");
+	fwrite(&SOTN_XEX[0],0xE84000,1,fSOTN_XEX);
+	fclose(fSOTN_XEX);
+	
+	printf("Saved original encrypted XEX to: %s\n",OpenPath);	// DEBUG
+	
+	for(int i=0;i<0xE84000;i++)
+	{
+		SOTN_XEX[i] = SOTN_XEX[i] ^ SOTN_XOR[i];
+	}
+	
+	// Save Decrypted Default.xex to file.
+	strcpy(OpenPath,FullPath);
+	strcat(OpenPath,"default.xex");
+	
+	fSOTN_XEX = fopen("default.xex","wb");
+	fwrite(&SOTN_XEX[0],0xE84000,1,fSOTN_XEX);
+	fclose(fSOTN_XEX);
+	
+	printf("Saved decrypted XEX to: %s\n",OpenPath);	// DEBUG
+}
 
 int main(int argc, char **argv)
 {
@@ -54,8 +187,12 @@ int main(int argc, char **argv)
 	LIVE_InitializeFileTree();
 	LIVE_ReadFileList();
 	LIVE_ExtractFiles();
+	SOTN_Decrypt();
 	
 	fclose(fLIVE);
+	
+	printf("\nOperations Complete.\n\n");
+	system("pause");
 }
 
 int LIVE_GetBlockOffset(int BlockNumber,int ID)
