@@ -13,6 +13,7 @@ You can use this guide to backup the file from your Xbox 360: https://github.com
 xextool -e u default.xex
 
 Once you have your folder with the extracted files and decrypted the default.xex file you do not need to do steps 1 through 2b again. You may want to backup the extracted files.
+
 Download the latest release and the Auto Tracker from Releases: https://github.com/MottZilla/SOTN_XB_RANDO/releases
 
 3. Run SotN_XB_RANDO. Select the decrypted default.xex file and then check the options you want. Click Randomize. 
