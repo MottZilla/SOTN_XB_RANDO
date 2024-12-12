@@ -7,7 +7,7 @@ It should have a CRC32 value of: CBC68CD8
 You can use this guide to backup the file from your Xbox 360: https://github.com/xenia-project/xenia/wiki/Quickstart
 
 2. Use LIVE_Extract on this repository to extract the files from the SotN XBLA package file to a folder. Download LIVE_Extract: https://github.com/MottZilla/SOTN_XB_RANDO/blob/main/LIVE_Extract_Release_20241211.zip
- Alternative programs are wxPirs or Velocity ( https://github.com/Gualdimar/Velocity/ )
+ Be sure to have LIVE_Extract, decrypt.xor, and your SotN file in the same folder! Alternative programs are wxPirs or Velocity ( https://github.com/Gualdimar/Velocity/ )
 
 2b. If you did not use LIVE_Extract or it could not decrypt the XEX then you must use the program XexTool to decrypt the default.xex file. Use this command:
 xextool -e u default.xex
