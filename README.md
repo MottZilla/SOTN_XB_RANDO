@@ -8,13 +8,13 @@ You can use this guide to backup the file from your Xbox 360: https://github.com
 
 2. Use LIVE_Extract on this repository to extract the files from the SotN XBLA package file to a folder. Alternative programs are wxPirs or Velocity ( https://github.com/Gualdimar/Velocity/ )
 
-3. Use the program XexTool to decrypt the default.xex file. Use this command:
+2b. If you did not use LIVE_Extract or it could not decrypt the XEX then you must use the program XexTool to decrypt the default.xex file. Use this command:
 xextool -e u default.xex
 
-Once you have your folder with the extracted files and decrypted the default.xex file you do not need to do steps 1 through 3 again. You may want to backup the extracted files.
+Once you have your folder with the extracted files and decrypted the default.xex file you do not need to do steps 1 through 2b again. You may want to backup the extracted files.
 
-4. Run SotN_XB_RANDO. Select the decrypted default.xex file and then check the options you want. Click Randomize. 
+3. Run SotN_XB_RANDO. Select the decrypted default.xex file and then check the options you want. Click Randomize. 
 
-5. After randomizing successfully you must load the Rando.xex file in Xenia. If using modded original hardware replace your default.xex with Rando.xex or use file manager to load Rando.xex
+4. After randomizing successfully you must load the Rando.xex file in Xenia. If using modded original hardware replace your default.xex with Rando.xex or use file manager to load Rando.xex
 
 This is beta software. Bugs may exist.
