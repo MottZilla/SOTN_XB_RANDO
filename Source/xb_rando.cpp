@@ -1493,7 +1493,7 @@ int XB_RelicNameToRID(char *Name)
 #define InvSize 64
 unsigned char XB_CurInv[InvSize];
 unsigned char XB_NewInv[InvSize];
-unsigned char XB_StepInv[15][InvSize];
+unsigned char XB_StepInv[16][InvSize];
 
 int XB_CheckRequirementLine(int Loc,int Line)
 {
@@ -2664,24 +2664,27 @@ void XB_AdjustRelicPositions()
 	
 	// Dark Blade
 	Loc = XB_FindLocation("Dark Blade");
-	RelicNumber = XB_RelicNameToNumber(XB_RelicChecks[Loc].Contents);
-	if(RelicNumber < 0x20) EntityType = 0xB;
-	if(RelicNumber > 0x20) EntityType = 0xA;
-	
-	if(EntityType == 0xB)	// If Relic, Move this Up off the Ground.
+	if(Loc>=0)
 	{
-		// X-Sorted
-		fseek(fXEX,OFS_X_DARKBLADE + 3,SEEK_SET);
-		fputc(0x80,fXEX);
-
-		// Y-Sorted
-		fseek(fXEX,OFS_Y_DARKBLADE + 3,SEEK_SET);
-		fputc(0x80,fXEX);		
+		RelicNumber = XB_RelicNameToNumber(XB_RelicChecks[Loc].Contents);
+		if(RelicNumber < 0x20) EntityType = 0xB;
+		if(RelicNumber > 0x20) EntityType = 0xA;
+		
+		if(EntityType == 0xB)	// If Relic, Move this Up off the Ground.
+		{
+			// X-Sorted
+			fseek(fXEX,OFS_X_DARKBLADE + 3,SEEK_SET);
+			fputc(0x80,fXEX);
+	
+			// Y-Sorted
+			fseek(fXEX,OFS_Y_DARKBLADE + 3,SEEK_SET);
+			fputc(0x80,fXEX);		
+		}
 	}
 	
 	// Osafune Katana (Equipment)
 	Loc = XB_FindLocation("Osafune Katana");
-	if(Loc)
+	if(Loc>=0)
 	{
 		RelicNumber = XB_RelicNameToNumber(XB_RelicChecks[Loc].Contents);
 		if(RelicNumber < 0x20) EntityType = 0xB;
@@ -2700,8 +2703,7 @@ void XB_AdjustRelicPositions()
 			XB_Write_u16_be(0x52);
 			fseek(fXEX,OFS_Y_OSAFUNEKATANA+2,SEEK_SET);
 			XB_Write_u16_be(0x89);
-		}
-		
+		}	
 	}
 
 	// TODO: ???
@@ -3161,7 +3163,7 @@ void XB_AddRandoString()
 		
 }
 
-int XB_InitializeItemPool(int Mode)
+void XB_InitializeItemPool(int Mode)
 {
 	// Zero
 	for(int n=0;n<512;n++)	{	XB_ItemCount[n] = 0;	}
@@ -3286,6 +3288,9 @@ int XB_GetRandomItem(int Mode)
 		//printf("XB_GetRandomItem: %s  * Remaining %d\n",XB_ItemNames[RandomNumber],XB_ItemCount[RandomNumber]);
 		return RandomNumber;
 	}
+	
+	// This should never happen
+	return 0;
 }
 
 void XB_RandoEquipmentZone(int Offset,int Length)
